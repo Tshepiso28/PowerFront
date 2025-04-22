@@ -1,1 +1,70 @@
-<p>sign-up works!</p>
+<div class="sign-in-container">
+    <h2>Sign In</h2>
+    
+    <form (ngSubmit)="onSubmit()" #signInForm="ngForm">
+      <div class="form-group">
+        <label for="fullName">Full Name</label>
+        <input 
+          type="text" 
+          id="fullName" 
+          name="fullName" 
+          [(ngModel)]="credentials.fullName" 
+          #fullNameInput="ngModel"
+          required
+          placeholder="Enter your full name"
+        >
+        <div *ngIf="fullNameInput.invalid && (fullNameInput.dirty || fullNameInput.touched)" class="error-message">
+          Full name is required
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          [(ngModel)]="credentials.email" 
+          #emailInput="ngModel"
+          required
+          email
+          placeholder="Enter your email"
+        >
+        <div *ngIf="emailInput.invalid && (emailInput.dirty || emailInput.touched)" class="error-message">
+          <div *ngIf="emailInput.errors?.['required']">Email is required</div>
+          <div *ngIf="emailInput.errors?.['email']">Please enter a valid email</div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          [(ngModel)]="credentials.password" 
+          #passwordInput="ngModel"
+          required
+          placeholder="Enter your password"
+        >
+        <div *ngIf="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)" class="error-message">
+          Password is required
+        </div>
+      </div>
+      
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+      
+      <button 
+        type="submit" 
+        [disabled]="signInForm.invalid || isSubmitting"
+      >
+        {{ isSubmitting ? 'Signing In...' : 'Sign In' }}
+      </button>
+      
+      <div class="form-footer">
+        Don't have an account? <a routerLink="/signup">Sign Up</a>
+      </div>
+    </form>
+  </div>
