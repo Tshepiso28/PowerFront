@@ -1,40 +1,60 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-sign-in',
-  imports: [FormsModule, CommonModule, RouterLink],
+  imports: [FormsModule, CommonModule, RouterLink, ReactiveFormsModule],
   templateUrl: './sign-in.component.html',
   styleUrl: './sign-in.component.scss'
 })
-export class SignInComponent {
-  credentials = {
-    email: '',
-    password: ''
-  };
-  
-  isSubmitting = false;
+export class SignInComponent implements OnInit {
+  signinForm: FormGroup;
+  isLoading = false;
   errorMessage = '';
+  successMessage = '';
 
   constructor(
+    private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
+    this.signinForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required]]
+    });
+  }
 
-  async onSubmit(): Promise<void> {
-    this.isSubmitting = true;
+  ngOnInit(): void {
+    const queryParams = this.route.snapshot.queryParams;
+    if (queryParams['registered'] === 'success') {
+      this.successMessage = 'Registration successful! Please sign in.';
+    }
+  }
+
+  onSubmit(): void {
+    if (this.signinForm.invalid) {
+      return;
+    }
+
+    this.isLoading = true;
     this.errorMessage = '';
 
-    try {
-      await this.authService.signIn(this.credentials.email, this.credentials.password);
-      this.router.navigate(['/dashboard']);
-    } catch (error: any) {
-      this.errorMessage = error.message || 'An error occurred during sign in';
-    } finally {
-      this.isSubmitting = false;
-    }
+    this.authService.signIn(
+      this.signinForm.value,
+      // Success callback
+      () => {
+        this.isLoading = false;
+        this.router.navigate(['/dashboard']);
+      },
+      // Error callback
+      (error) => {
+        this.isLoading = false;
+        this.errorMessage = error.error?.message || 'Invalid email or password';
+      }
+    );
   }
 }
