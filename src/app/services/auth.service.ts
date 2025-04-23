@@ -1,103 +1,67 @@
+// src/app/services/auth.service.ts
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
 
-export interface User {
-  id: string;
+export interface SignUpData {
+  fullName: string;
   email: string;
-  name?: string;
+  password: string;
+}
+
+export interface SignInData {
+  email: string;
+  password: string;
 }
 
 export interface AuthResponse {
-  user: User;
-  token: string;
+  accessToken: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://127.0.0.1:5000'; // Replace with your actual API URL
-  private currentUser: User | null = null;
+  private apiUrl = 'https://your-api-endpoint.com/api'; // Replace with your actual API URL
+  private tokenKey = 'auth_token';
+  isAuthenticated = false;
 
-  constructor(private http: HttpClient, private router: Router) {
-    this.loadUser();
+  constructor(private http: HttpClient) { 
+    this.checkAuthStatus();
   }
 
-  private loadUser(): void {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      this.currentUser = JSON.parse(userData);
-    }
+  private checkAuthStatus(): void {
+    this.isAuthenticated = !!this.getToken();
   }
 
-  get isLoggedIn(): boolean {
-    return !!this.currentUser;
+  signUp(userData: SignUpData, successCallback: () => void, errorCallback: (error: any) => void): void {
+    this.http.post(`${this.apiUrl}/signup`, userData).subscribe({
+      next: () => successCallback(),
+      error: (error) => errorCallback(error)
+    });
   }
 
-  get user(): User | null {
-    return this.currentUser;
-  }
-
-  get token(): string | null {
-    return localStorage.getItem('token');
-  }
-
-  async signUp(email: string, password: string, name?: string): Promise<void> {
-    try {
-      const response = await fetch(`${this.apiUrl}/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password, name })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Sign up failed');
-      }
-
-      const data: AuthResponse = await response.json();
-      this.handleAuthResponse(data);
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Updated to include fullName parameter
-  async signIn(email: string, password: string, fullName?: string): Promise<void> {
-    try {
-      const response = await fetch(`${this.apiUrl}/signin`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password, fullName })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Sign in failed');
-      }
-
-      const data: AuthResponse = await response.json();
-      this.handleAuthResponse(data);
-    } catch (error) {
-      throw error;
-    }
+  signIn(credentials: SignInData, successCallback: () => void, errorCallback: (error: any) => void): void {
+    this.http.post<AuthResponse>(`${this.apiUrl}/signin`, credentials).subscribe({
+      next: (response) => {
+        this.setToken(response.accessToken);
+        this.isAuthenticated = true;
+        successCallback();
+      },
+      error: (error) => errorCallback(error)
+    });
   }
 
   signOut(): void {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    this.currentUser = null;
-    this.router.navigate(['/signin']);
+    localStorage.removeItem(this.tokenKey);
+    this.isAuthenticated = false;
   }
 
-  private handleAuthResponse(response: AuthResponse): void {
-    localStorage.setItem('token', response.token);
-    localStorage.setItem('user', JSON.stringify(response.user));
-    this.currentUser = response.user;
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  private setToken(token: string): void {
+    localStorage.setItem(this.tokenKey, token);
   }
 }
