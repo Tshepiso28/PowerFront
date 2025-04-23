@@ -1,5 +1,3 @@
-// src/app/services/auth.service.ts
-
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
@@ -22,7 +20,7 @@ export interface AuthResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://your-api-endpoint.com/api'; // Replace with your actual API URL
+  private apiUrl = 'http://127.0.0.1:5000';
   private tokenKey = 'auth_token';
   isAuthenticated = false;
 
