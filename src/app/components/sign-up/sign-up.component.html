@@ -14,9 +14,9 @@
         <input 
           type="text" 
           id="fullName" 
-          formControlName="fullName" 
+          formControlName="full_name" 
           placeholder="Enter your full name">
-        @if (signupForm.get('fullName')?.invalid && signupForm.get('fullName')?.touched) {
+        @if (signupForm.get('full_name')?.invalid && signupForm.get('full_name')?.touched) {
           <div class="input-error">Full name is required</div>
         }
       </div>

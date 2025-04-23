@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 export interface SignUpData {
-  fullName: string;
+  full_name: string;
   email: string;
   password: string;
 }
