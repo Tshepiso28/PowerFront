@@ -1,0 +1,14 @@
+<header class="app-header">
+    <div class="logo">
+      <a routerLink="/">My App</a>
+    </div>
+    
+    <nav class="nav-links">
+      @if (authService.isAuthenticated) {
+        <button class="sign-out-btn" (click)="onSignOut()">Sign Out</button>
+      } @else {
+        <a routerLink="/signin" class="nav-link">Sign In</a>
+        <a routerLink="/signup" class="nav-link sign-up">Sign Up</a>
+      }
+    </nav>
+  </header>
