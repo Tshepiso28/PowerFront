@@ -1,6 +1,17 @@
 :host {
     display: contents;
   }
+  .success-message{
+    color: green;
+  }
+
+  .error-message{
+    color: red;
+  }
+
+  .input-error{
+    color: red;
+  }
   
   .login-container {
     max-width: none;
